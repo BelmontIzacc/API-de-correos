@@ -13,11 +13,7 @@ router.get('/prueba', usuario.usarIdUsuario);
 
 router.get('/enviarcorreo', usuario.enviarCorreo);
 //router.get('/confirmado/:id_usuario', usuario.mostrarPagina);
-router.get('/confirmado/:token', autMiddleware.verifyTokenInURL, async (req, res) => {
-    id_usuario = req.userId;
-    console.log(id_usuario);
-    usuario.mostrarPagina(id_usuario, res);
-});
+router.get('/confirmado/:token', usuario.mostrarPagina);
 
 
 // Esta ruta será una vista por defecto para rutas no definidas
