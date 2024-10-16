@@ -10,28 +10,15 @@ const codigos = require('../exception/codigos');
 const key = "VSSL";
 let id_usuario;
 
-usuarioCtrl.mostrarPagina = async (req, res) => {
-    //Validar y decodificar el token
-    const token = req.params.token; 
-    console.log(token);
-    if (!token) {
-        return res.status(400).json({ message: 'Token no proporcionado' });
-    }
-    jwt.verify(token, key, (err, decoded) => {
-        if (err) {
-            return res.status(400).json({ message: 'Token inválido o expirado' });
-        }
-        id_decodificada = decoded.id; 
-    });
-
+usuarioCtrl.mostrarPagina = async (id_usuario1, res) => {
     //Validar usuario y mostrar página
-    id_usuario = id_decodificada;
+    id_usuario = id_usuario1;
     if (id_usuario != undefined && id_usuario != null){
-        console.log(id_usuario);
-        const usuario = await Usuario.findById(id_usuario); 
-        if (usuario){
-            const usuario = {confirmado: true};
-            await Usuario.findByIdAndUpdate(id_usuario, { $set: usuario }, { new: true });
+        console.log("Id decodificada:",id_usuario);
+        const usuario = await Usuario.findOne({ id_usuario: id_usuario }); 
+        if (usuario) {
+            usuario.confirmado = true; 
+            await usuario.save(); 
             res.render("../views/pages/index", { id_usuario });
         } else {
             return new StandarException('Usuario no encontrado', codigos.datosNoEncontrados);
