@@ -7,7 +7,8 @@ const usuarioCtrl = {};
 const StandarException = require('../exception/StandarException');
 const codigos = require('../exception/codigos');
 
-const key = "VSSL";
+const key = process.env.JWT_SECRET;
+console.log(key);
 let id_usuario;
 
 usuarioCtrl.mostrarPagina = async (id_usuario1, res) => {
@@ -169,7 +170,7 @@ const generarIds = () => {
     return `${prefix}${day}${month}${year}${hour}${minutes}${counterStr}`;
 };
 
-
+/** 
 //comprueba que cada id sea único
 prueba_id = () => {
     const ids = [];
@@ -181,7 +182,7 @@ prueba_id = () => {
     console.log(uniqueIds.size === ids.length);
 }
 
-prueba_id();
+prueba_id();*/
 
 
 module.exports = usuarioCtrl;

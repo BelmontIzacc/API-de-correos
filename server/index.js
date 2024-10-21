@@ -7,9 +7,7 @@ const {mongoose} = require('./databases');
 const path = require('path');
 const handleError = require('./middleware/error.middleware');
 const favicon = require('serve-favicon');
-
-//const PostageApp = require('postageapp');
-//var postageapp = new PostageApp('ACCOUNT_API_KEY');
+require('dotenv').config();
 
 //Configuración del servidor
 app.set('port', process.env.PORT || 3000);
