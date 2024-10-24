@@ -1,24 +1,107 @@
 const express = require('express');
 const router = express.Router();
 
-const usuario = require('../controllers/usuario.controller');
+const usuarioCtrl = require('../controllers/usuario.controller');
+const correoCtrl = require('../controllers/correo.controller');
+
 const autMiddleware = require('../middleware/authentication.middleware');
+const verifyToken = autMiddleware.verifyToken;
 
-router.get('/usuarios', usuario.getUsuarios);
-router.post('/usuarios', usuario.createUsuario);
-router.get('/usuarios/:id', usuario.getUsuario);
-router.put('/usuarios/:id', usuario.editUsuario);
-router.delete('/usuarios/:id', usuario.deleteUsuario);
-router.get('/prueba', usuario.usarIdUsuario);
+const StandarException = require('../exception/StandarException');
+const { token } = require('morgan');
 
-router.get('/enviarcorreo', usuario.enviarCorreo);
-//router.get('/confirmado/:id_usuario', usuario.mostrarPagina);
-//router.get('/confirmado/:token', usuario.mostrarPagina);
-router.get('/confirmado/:token', autMiddleware.verifyTokenInURL, async (req, res) => {
-    id_usuario = req.userId;
-    console.log("Id_usuario:"+id_usuario);
-    usuario.mostrarPagina(id_usuario, res);
+
+router.post('/test', async (req, res, next) => {
+    const user = req.body.correo;
+    const pass = req.body.contrasena;
+    if (!user || !pass) {
+        res.json(new StandarException('Datos incompletos', 400));
+        return;
+    }
+    const respuesta_usuario = await usuarioCtrl.createUsuario(user, pass);
+    console.log(respuesta_usuario);
+    if (respuesta_usuario instanceof StandarException) {
+        console.log(respuesta_usuario);
+        res.json(respuesta_usuario);
+        return;
+    }
+    const respuesta_correo = await correoCtrl.enviarCorreo(respuesta_usuario.usuario, respuesta_usuario.token);
+    if (respuesta_correo instanceof StandarException) {
+        console.log(respuesta_correo);
+        res.json(respuesta_correo);
+        return;
+    }
+    res.json({respuesta_usuario, respuesta_correo});
 });
+
+router.get('/confirmado/:token', async (req, res) => {
+    console.log("req.params: ", req.params);
+    const token = req.params.token;
+    const respuesta = await usuarioCtrl.mostrarPagina(token, res);
+    if (respuesta instanceof StandarException) {
+        console.log(respuesta);
+        res.json(respuesta);
+        return;
+    }
+    res.render("../views/pages/index");
+});
+
+router.get('/usuarios', verifyToken, async (req, res) => {
+    const respuesta = await usuarioCtrl.getUsuarios();
+    if (respuesta instanceof StandarException) {
+        console.log(respuesta);
+        res.json(respuesta);
+        return;
+    }
+    res.json(respuesta);
+});
+
+router.get('/usuarios/:id', verifyToken, async (req, res) => {
+    const respuesta = await usuarioCtrl.getUsuario(req.params.id);
+    if (respuesta instanceof StandarException) {
+        console.log(respuesta);
+        res.json(respuesta);
+        return;
+    }
+    res.json(respuesta);
+});
+
+router.put('/usuarios/:id', verifyToken, async (req, res) => {
+    const respuesta = await usuarioCtrl.editUsuario(req.params.id, req.body);
+    if (respuesta instanceof StandarException) {
+        console.log(respuesta);
+        res.json(respuesta);
+        return;
+    }
+    res.json(respuesta);
+});
+
+router.delete('/usuarios/:id', verifyToken, async (req, res) => {
+    const respuesta = await usuarioCtrl.deleteUsuario(req.params.id);
+    if (respuesta instanceof StandarException) {
+        console.log(respuesta);
+        res.json(respuesta);
+        return;
+    }
+    res.json(respuesta);
+});
+
+router.get('/enviarcorreo', verifyToken, async (req, res) => {
+    const user = {
+        correo: "prueba",
+        contrasena: "prueba",
+        id_usuario: "123456"
+    };
+    const token = "123456";
+    const respuesta_correo = await correoCtrl.enviarCorreo(user, token);
+    if (respuesta_correo instanceof StandarException) {
+        console.log(respuesta_correo);
+        res.json(respuesta_correo);
+        return;
+    }
+    res.json({respuesta_usuario, respuesta_correo});
+});
+
 
 
 // Esta ruta será una vista por defecto para rutas no definidas

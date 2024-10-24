@@ -1,60 +1,9 @@
 const Correo = require('../models/correo');
 const PostageApp = require('postageapp');
-const jwt = require('jsonwebtoken');
 const correoCtrl = {};
 //const usuario = require('../controllers/usuario.controller');
 
 //console.log("Correo: ",id_usuario);
-
-/**
- * @description Envia un correo de confirmación
- * @param {*} usuario
- * @param {*} token
- * @returns
-*/
-correoCtrl.enviarCorreo = async (usuario, token) => {
-    console.log("Enviando correo");
-    id_usuario = usuario.id_usuario;
-    console.log({id_usuario});
-    if (!id_usuario) {
-        return new StandarException('ID de usuario no definido', codigos.validacionIncorrecta);
-    }
-    console.log("Enviando correo: 1");
-    const link = `http://localhost:3000/confirmado/${token}`;
-    console.log({link});
-    var postageapp = new PostageApp("VkyMBXgOdzGHtUPoRByHdEelTLYmcTBH");
-    //const link = `http://localhost:3000/confirmado`;
-
-    var options = {
-        recipients: "idbird.upiiz@gmail.com",
-        headers: {
-            subject: "Prueba 10",
-            from: "idbird.upiiz@gmail.com",
-        },
-        template: "IdBird_child",
-        variables: {
-            aplicacion: "IdBird",
-            nombre: usuario.correo,
-            link: link,
-        },
-    };
-    // Validar estructura del correo
-    if (!options.recipients || !options.headers.subject || !options.headers.from || !options.template || !options.variables.link) {
-        return new StandarException('Estructura del correo no válida', codigos.validacionIncorrecta);
-    }
-
-    const response = await postageapp.sendMessage(options).catch(error => null);
-    if (response === null) {
-        return new StandarException('Error al enviar el correo', codigos.errorAlEnviarCorreo);
-    }
-
-    return{
-        status: true,
-        respuesta: response,
-        link: link,
-        token: token
-    };
-};
 
 // Manejador para obtener todos los correos
 correoCtrl.getCorreos = async (req, res) => {
@@ -108,5 +57,56 @@ correoCtrl.deleteCorreo = async (req, res) => {
         res.status(500).json({ message: 'Error al eliminar el correo', error });
     }
 };
+
+/*
+var postageapp = new PostageApp('VkyMBXgOdzGHtUPoRByHdEelTLYmcTBH');
+const link = `http://localhost:3000/${id_usuario}`;
+
+var options = {
+    recipients: "idbird.upiiz@gmail.com",  
+    headers: {
+      subject: "Prueba 7",
+      from: "idbird.upiiz@gmail.com"
+    }, 
+    "template" : "IdBird_child",
+    variables: {
+        'aplicacion' : "IdBird",
+        'nombre' : "Ejemplo",
+        'link' : link
+    }
+}*/
+/*
+postageapp.sendMessage(options).then((response) => {
+    console.log(response);
+}).catch((error) => {
+  console.error(error);
+});*/
+
+/*postageapp.message_delivery_status('b5b8e130-8e38-4b95-8f75-96492d43b86c').then(() => {
+    console.log(response);
+})
+
+postageapp.messages_history().then((response) => {
+    console.log(response);
+}).catch((error) => {
+  console.error(error);
+});
+
+postageapp.message_delivery_status({uid: 'f0b20136-2fba-42ba-9c74-10c9cb6e2ed7'}).then((response) => {
+    console.log(response);
+}).catch((error) => {
+    console.error(error);
+});*/
+/*
+correoCtrl.enviarCorreo = async (req, res) => {
+    //const link = `http://localhost:3000/${id_usuario}`;
+    console.log(id_usuario);
+    postageapp.sendMessage(options).then((response) => {
+        res.json(response);
+    }).catch((error) => {
+        res.json(error);
+    });
+};*/
+
 
 module.exports = correoCtrl;

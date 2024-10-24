@@ -25,7 +25,7 @@ app.use(favicon(faviconPath));
 //Middlewares - funciones de procesamiento de datos
 app.use(morgan('dev')); //Mostrar mensajes del usuario
 app.use(express.json()); //Traduce JSON
-app.use(express.urlencoded({extended: false})); //Traduce datos de formularios
+app.use(express.urlencoded({extended: true})); //Traduce datos de formularios
 app.use(cors()); //Permite la comunicación entre servidores
 app.use(handleError);
 

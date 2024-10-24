@@ -7,20 +7,45 @@ const usuarioCtrl = {};
 const StandarException = require('../exception/StandarException');
 const codigos = require('../exception/codigos');
 
-const key = process.env.JWT_SECRET;
-console.log(key);
-let id_usuario;
+const key = process.env.TOKEN_KEY;
+//let id_usuario;
 
-usuarioCtrl.mostrarPagina = async (id_usuario1, res) => {
+//const token_inicial = jwt.sign({ id: "VSSL" }, key, { expiresIn: '24h' });
+//console.log(token_inicial);
+
+/**
+ * @description Muestra la página de confirmación de correo
+ * @param {*} token 
+ * @param {*} res 
+ * @returns 
+ */
+usuarioCtrl.mostrarPagina = async (token, res) => {
+    //Validar y decodificar el token
+    let id_decodificada;
+    console.log(token);
+    if (!token) {
+        return new StandarException('Token inexistente', codigos.tokenInexistente);
+        }
+    jwt.verify(token, key, (err, decoded) => {
+        console.log(decoded);
+        if (err) {
+            console.log(err);
+            return new StandarException('Token inválido o expirado', codigos.tokenInvalido, err);
+        }
+        id_decodificada = decoded.id; 
+    });
+
     //Validar usuario y mostrar página
-    id_usuario = id_usuario1;
-    if (id_usuario != undefined && id_usuario != null){
-        console.log("Id decodificada:",id_usuario);
-        const usuario = await Usuario.findOne({ id_usuario: id_usuario }); 
+    if (id_decodificada != undefined && id_decodificada != null){
+        console.log("Id decodificada:",id_decodificada);
+        const usuario = await Usuario.findOne({ id_usuario: id_decodificada }); 
         if (usuario) {
             usuario.confirmado = true; 
             await usuario.save(); 
-            res.render("../views/pages/index", { id_usuario });
+            return{
+                status: true,
+                id_decodificada: id_decodificada
+            };
         } else {
             return new StandarException('Usuario no encontrado', codigos.datosNoEncontrados);
         }
@@ -29,15 +54,28 @@ usuarioCtrl.mostrarPagina = async (id_usuario1, res) => {
     }
 }
 
-usuarioCtrl.createUsuario = async (req, res) => {
+/**
+ * @description Crea un usuario
+ * @param {*} user
+ * @param {*} pass
+ * @param {*} enviarCorreo
+ * @returns
+*/
+usuarioCtrl.createUsuario = async (user, pass, enviarCorreo) => {
+    // validar primero entradas
+    /*if(!usuario){
+        return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario);
+    }*/
+    
     const id_generada = generarIds();
     if (id_generada == undefined && id_generada == null){
-        return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario, error); 
+        return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario); 
     }
     console.log(id_generada)
     const usuario = new Usuario({
         id_usuario: id_generada,
-        ...req.body
+        correo: user,
+        contrasena: pass
     });
     const savedUsuario = await usuario.save().catch(error => {
         return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario, error);
@@ -46,106 +84,34 @@ usuarioCtrl.createUsuario = async (req, res) => {
     id_usuario = usuario.id_usuario.toString();
     console.log(id_usuario);
 
-    const token = jwt.sign({ id: id_usuario }, key, { expiresIn: '1h' });
+    //validar el usuario
+    const token = jwt.sign({ id: id_usuario }, key, { expiresIn: '8h' });
+    //const token = jwt.sign({ id: 1234 }, key, { expiresIn: '1h' });
+    //const token = jwt.sign({ id: "123456789Belmont", key: key, fecha: new Date().getTime, email: "correo@correo" }, 'zcz0au22eiz3s23l4oie2V222', { expiresIn: '1h' });
     console.log(token);
+    // validar el envio del correo
+    //const token2 = jwt.sign({ id: "123456789Belmont", key: key, fecha: new Date().getTime, email: "correo@correo", accion: "correo" }, 'zcz0au22eiz3s23l4oie2V222', { expiresIn: '1h' });
+    //console.log(token2);
 
-    const correoEnviado = await usuarioCtrl.enviarCorreo(req, res, token).catch(error => {
+    /*const correoEnviado = await enviarCorreo(req, res, token, token2).catch(error => {
         return new StandarException('Error al enviar correo', codigos.errorAlEnviarCorreo, error);
-    });
-};
-
-
-usuarioCtrl.getUsuarios = async (req, res) => {
-    try {
-        const usuarios = await Usuario.find(); 
-        res.json(usuarios);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener los usuarios" });
-    }
-};
-
-usuarioCtrl.getUsuario = async (req, res) => {
-    const usuario = await Usuario.findById(req.params.id); 
-    if(!usuario){
-        return new StandarException('Usuario no encontrado', codigos.datosNoEncontrados);
-    }
-    return usuario;
-};
-
-usuarioCtrl.editUsuario = async (req, res) => {
-    try{
-        const { id } = req.params;
-        console.log(id);
-        const usuario = {
-        confirmado: true,
-        };
-        await Usuario.findByIdAndUpdate(id, { $set: usuario }, { new: true });
-        res.json({ status: "Usuario actualizado"  });
-    } catch (error) {
-        res.status(500).json({ message: 'Usuario no encontrado'});
-    }
-};
-
-usuarioCtrl.deleteUsuario = async (req, res) => {
-    try {
-    //await Usuario.findByIdAndRemove(req.params.id); 
-        await Usuario.findByIdAndDelete(req.params.id);
-        res.json({ status: "Usuario eliminado" });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al eliminar usuario' });
-    }
-};
-
-usuarioCtrl.usarIdUsuario = (req, res) => {
-    try {
-        console.log(`El id_usuario actual es: ${id_usuario}`);
-        res.json({ id_usuario });
-    } catch (error) {
-        res.status(500).json({ message: "Error al usar id_usuario"});
-    }
-};
-
-
-usuarioCtrl.enviarCorreo = async (req, res, token) => {
-    console.log("Enviando correo");
-    console.log({id_usuario});
-    if (!id_usuario) {
-        return new StandarException('ID de usuario no definido', codigos.validacionIncorrecta);
-    }
-    console.log("Enviando correo: 1");
-    const link = `http://localhost:3000/confirmado/${token}`;
-    console.log({link});
-    var postageapp = new PostageApp("VkyMBXgOdzGHtUPoRByHdEelTLYmcTBH");
-    //const link = `http://localhost:3000/confirmado`;
-
-    var options = {
-        recipients: "idbird.upiiz@gmail.com",
-        headers: {
-            subject: "Prueba 10",
-            from: "idbird.upiiz@gmail.com",
-        },
-        template: "IdBird_child",
-        variables: {
-            aplicacion: "IdBird",
-            nombre: "Ejemplo",
-            link: link,
-        },
+    });*/
+    return{
+        status: true,
+        usuario: usuario,
+        token: token
     };
-    // Validar estructura del correo
-    if (!options.recipients || !options.headers.subject || !options.headers.from || !options.template || !options.variables.link) {
-        return new StandarException('Estructura del correo no válida', codigos.validacionIncorrecta);
-    }
 
-    const response = await postageapp.sendMessage(options).catch(error => null);
-    if (response === null) {
-        return new StandarException('Error al enviar el correo', codigos.errorAlEnviarCorreo);
-    }
-    res.json(response);
+    /*const correoEnviado = await usuarioCtrl.enviarCorreo(req, res, token).catch(error => {
+        return new StandarException('Error al enviar correo', codigos.errorAlEnviarCorreo, error);
+    });*/
 };
+
 
 let counter = 0;
 let lastGeneratedHour = "";
 
+//Genera un id único
 const generarIds = () => {
     const prefix = '107';
     const date = new Date();
@@ -170,7 +136,104 @@ const generarIds = () => {
     return `${prefix}${day}${month}${year}${hour}${minutes}${counterStr}`;
 };
 
-/** 
+/**
+ * @description Obtiene todos los usuarios
+ * @returns
+*/
+usuarioCtrl.getUsuarios = async () => {
+    try {
+        const usuarios = await Usuario.find(); 
+        return usuarios;
+    } catch (error) {
+        return new StandarException('Usuarios no encontrados', codigos.datosNoEncontrados, error);
+    }
+};
+
+/**
+ * @description Obtiene un usuario
+ * @param {*} id
+ * @returns
+*/
+usuarioCtrl.getUsuario = async (id) => {
+    try{
+        let usuario;
+        console.log(id);
+        //console.log(id.length);
+        if (id.length != 17) {
+            usuario = await Usuario.findById(id); 
+        }else{
+            usuario = await Usuario.findOne({ id_usuario: id });
+        }
+        if(!usuario){
+            return new StandarException('Usuario no encontrado', codigos.datoNoEncontrado);
+        }
+        return usuario;
+    } catch (error) {
+        return new StandarException('Usuario no encontrado', codigos.datoNoEncontrado, error);
+    }    
+};
+
+/**
+ * @description Edita un usuario
+ * @param {*} id
+ * @param {*} usuario
+ * @returns
+*/
+usuarioCtrl.editUsuario = async (id, usuario) => {
+    try{
+        console.log(id);
+        console.log(usuario);
+        const usuarioNuevo = {
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            correo: usuario.correo,
+            contrasena: usuario.contrasena
+        };
+        if (id.length != 17) {
+            await Usuario.findByIdAndUpdate(id, { $set: usuarioNuevo }, { new: true });
+        }else{
+            await Usuario.findOneAndUpdate({ id_usuario: id }, { $set: usuarioNuevo }, { new: true });
+        }
+        return usuarioNuevo;
+    } catch (error) {
+        return new StandarException('Usuario no encontrado', codigos.datoNoEncontrado);
+    }
+};
+
+/**
+ * @description Elimina un usuario
+ * @param {*} id
+ * @returns
+*/
+usuarioCtrl.deleteUsuario = async (id) => {
+    try {
+    //await Usuario.findByIdAndRemove(req.params.id); 
+    //await Usuario.findByIdAndDelete(id);
+        console.log(id);
+        if (id.length != 17) {
+            await Usuario.findByIdAndDelete(id);
+        }
+        else{
+            await Usuario.findOneAndDelete({ id_usuario: id });
+        }
+        return { status: "Usuario eliminado" };
+    } catch (error) {
+        return new StandarException('Usuario no encontrado', codigos.datoNoEncontrado);
+    }
+};
+
+/**
+usuarioCtrl.usarIdUsuario = (req, res) => {
+    try {
+        console.log(`El id_usuario actual es: ${id_usuario}`);
+        res.json({ id_usuario });
+    } catch (error) {
+        res.status(500).json({ message: "Error al usar id_usuario"});
+    }
+};
+
+
+
 //comprueba que cada id sea único
 prueba_id = () => {
     const ids = [];
