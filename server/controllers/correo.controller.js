@@ -14,12 +14,12 @@ const correoCtrl = {};
 */
 correoCtrl.enviarCorreo = async (usuario, token) => {
     console.log("Enviando correo");
+    //console.log({usuario});
     id_usuario = usuario.id_usuario;
     console.log({id_usuario});
     if (!id_usuario) {
         return new StandarException('ID de usuario no definido', codigos.validacionIncorrecta);
     }
-    console.log("Enviando correo: 1");
     //https://idbird-api.onrender.com
     const link = `https://idbird-api.onrender.com/confirmado/${token}`;
     console.log({link});
@@ -32,13 +32,16 @@ correoCtrl.enviarCorreo = async (usuario, token) => {
     if (!destinatario || !esCorreoValido(destinatario)) {
         return new StandarException('Correo no definido o formato incorrecto', codigos.validacionIncorrecta);
     }
-    let nombre_destiniatario;
+    let nombre_destinatario;
     if (!usuario.nombre) {
-        nombre_destiniatario = usuario.nombre;
+        nombre_destinatario = usuario.correo;
     } else {
-        nombre_destiniatario = usuario.correo;
+        nombre_destinatario = usuario.nombre;
+        if (usuario.apellido) {
+            nombre_destinatario += " " + usuario.apellido;
+        }
     }
-
+    console.log({nombre_destinatario});
 
     var options = {
         recipients: destinatario,
@@ -49,7 +52,7 @@ correoCtrl.enviarCorreo = async (usuario, token) => {
         template: "IdBird_child",
         variables: {
             aplicacion: "IdBird",
-            nombre: nombre_destiniatario,
+            nombre: nombre_destinatario,
             link: link,
         },
     };

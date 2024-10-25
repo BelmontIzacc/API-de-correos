@@ -68,7 +68,6 @@ usuarioCtrl.createUsuario = async (user, pass, nombre, apellido) => {
     if (id_generada == undefined && id_generada == null){
         return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario); 
     }
-    console.log(id_generada)
     if(!nombre && !apellido){
         usuario = new Usuario({
             id_usuario: id_generada,
@@ -87,12 +86,12 @@ usuarioCtrl.createUsuario = async (user, pass, nombre, apellido) => {
     const savedUsuario = await usuario.save().catch(error => {
         return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario, error);
     });
-    console.log(usuario);
+    //console.log(usuario);
     id_usuario = usuario.id_usuario.toString();
-    console.log(id_usuario);
+    //console.log(id_usuario);
     //validar el usuario
     const token = jwt.sign({ id: id_usuario }, key, { expiresIn: '8h' });
-    console.log(token);
+    //console.log(token);
     return{
         status: true,
         usuario: usuario,
