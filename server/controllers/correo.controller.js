@@ -20,7 +20,8 @@ correoCtrl.enviarCorreo = async (usuario, token) => {
         return new StandarException('ID de usuario no definido', codigos.validacionIncorrecta);
     }
     console.log("Enviando correo: 1");
-    const link = `http://localhost:3000/confirmado/${token}`;
+    //https://idbird-api.onrender.com
+    const link = `https://idbird-api.onrender.com/confirmado/${token}`;
     console.log({link});
     var postageapp = new PostageApp("VkyMBXgOdzGHtUPoRByHdEelTLYmcTBH");
     //const link = `http://localhost:3000/confirmado`;
