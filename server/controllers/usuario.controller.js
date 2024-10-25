@@ -10,7 +10,8 @@ const codigos = require('../exception/codigos');
 const key = process.env.TOKEN_KEY;
 //let id_usuario;
 
-//const token_inicial = jwt.sign({ id: "VSSL" }, key, { expiresIn: '24h' });
+const token_inicial = jwt.sign({ id: process.env.AUTHENTIFICATION_KEY }, key);
+//console.log(process.env.AUTHENTIFICATION_KEY);
 //console.log(token_inicial);
 
 /**

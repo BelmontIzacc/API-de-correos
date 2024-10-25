@@ -37,7 +37,7 @@ autMiddleware.verifyToken = (req, res, next) => {
             console.log(err);
             return res.status(400).json({ message: 'Token inválido o expirado' });
         }
-        if (user.id == "VSSL") {
+        if (user.id == process.env.AUTHENTIFICATION_KEY) {
             //console.log(user.id);
             req.userId = user.id;
             next();
