@@ -64,18 +64,19 @@ usuarioCtrl.mostrarPagina = async (token, res) => {
 */
 usuarioCtrl.createUsuario = async (user, pass, nombre, apellido) => {   
     const id_generada = generarIds();
+    let usuario;
     if (id_generada == undefined && id_generada == null){
         return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario); 
     }
     console.log(id_generada)
     if(!nombre && !apellido){
-        const usuario = new Usuario({
+        usuario = new Usuario({
             id_usuario: id_generada,
             correo: user,
             contrasena: pass
         });
     }else{
-        const usuario = new Usuario({
+        usuario = new Usuario({
             id_usuario: id_generada,
             nombre: nombre,
             apellido: apellido,
