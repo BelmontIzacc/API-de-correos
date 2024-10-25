@@ -26,10 +26,17 @@ correoCtrl.enviarCorreo = async (usuario, token) => {
     var postageapp = new PostageApp("VkyMBXgOdzGHtUPoRByHdEelTLYmcTBH");
     //const link = `http://localhost:3000/confirmado`;
 
+    //const destinatario = "idbird.upiiz@gmail.com";
+    const destinatario = usuario.correo;
+    //valida que destinataio tenga un formato de correo
+    if (!destinatario || !esCorreoValido(destinatario)) {
+        return new StandarException('Correo no definido o formato incorrecto', codigos.validacionIncorrecta);
+    }
+
     var options = {
-        recipients: "idbird.upiiz@gmail.com",
+        recipients: destinatario,
         headers: {
-            subject: "Prueba 10",
+            subject: "Resgistro en IdBird",
             from: "idbird.upiiz@gmail.com",
         },
         template: "IdBird_child",
@@ -56,6 +63,12 @@ correoCtrl.enviarCorreo = async (usuario, token) => {
         token: token
     };
 };
+
+// Función para validar un correo
+function esCorreoValido(correo) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(correo);
+}
 
 // Manejador para obtener todos los correos
 correoCtrl.getCorreos = async (req, res) => {
@@ -109,5 +122,6 @@ correoCtrl.deleteCorreo = async (req, res) => {
         res.status(500).json({ message: 'Error al eliminar el correo', error });
     }
 };
+
 
 module.exports = correoCtrl;
