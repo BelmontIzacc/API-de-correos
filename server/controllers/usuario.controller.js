@@ -62,50 +62,41 @@ usuarioCtrl.mostrarPagina = async (token, res) => {
  * @param {*} enviarCorreo
  * @returns
 */
-usuarioCtrl.createUsuario = async (user, pass, enviarCorreo) => {
-    // validar primero entradas
-    /*if(!usuario){
-        return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario);
-    }*/
-    
+usuarioCtrl.createUsuario = async (user, pass, nombre, apellido) => {   
     const id_generada = generarIds();
     if (id_generada == undefined && id_generada == null){
         return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario); 
     }
     console.log(id_generada)
-    const usuario = new Usuario({
-        id_usuario: id_generada,
-        correo: user,
-        contrasena: pass
-    });
+    if(!nombre && !apellido){
+        const usuario = new Usuario({
+            id_usuario: id_generada,
+            correo: user,
+            contrasena: pass
+        });
+    }else{
+        const usuario = new Usuario({
+            id_usuario: id_generada,
+            nombre: nombre,
+            apellido: apellido,
+            correo: user,
+            contrasena: pass
+        });
+    }   
     const savedUsuario = await usuario.save().catch(error => {
         return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario, error);
     });
     console.log(usuario);
     id_usuario = usuario.id_usuario.toString();
     console.log(id_usuario);
-
     //validar el usuario
     const token = jwt.sign({ id: id_usuario }, key, { expiresIn: '8h' });
-    //const token = jwt.sign({ id: 1234 }, key, { expiresIn: '1h' });
-    //const token = jwt.sign({ id: "123456789Belmont", key: key, fecha: new Date().getTime, email: "correo@correo" }, 'zcz0au22eiz3s23l4oie2V222', { expiresIn: '1h' });
     console.log(token);
-    // validar el envio del correo
-    //const token2 = jwt.sign({ id: "123456789Belmont", key: key, fecha: new Date().getTime, email: "correo@correo", accion: "correo" }, 'zcz0au22eiz3s23l4oie2V222', { expiresIn: '1h' });
-    //console.log(token2);
-
-    /*const correoEnviado = await enviarCorreo(req, res, token, token2).catch(error => {
-        return new StandarException('Error al enviar correo', codigos.errorAlEnviarCorreo, error);
-    });*/
     return{
         status: true,
         usuario: usuario,
         token: token
     };
-
-    /*const correoEnviado = await usuarioCtrl.enviarCorreo(req, res, token).catch(error => {
-        return new StandarException('Error al enviar correo', codigos.errorAlEnviarCorreo, error);
-    });*/
 };
 
 

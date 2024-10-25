@@ -11,14 +11,16 @@ const StandarException = require('../exception/StandarException');
 const { token } = require('morgan');
 
 
-router.post('/test', async (req, res, next) => {
+router.post('/registrar', async (req, res, next) => {
     const user = req.body.correo;
     const pass = req.body.contrasena;
+    const nombre = req.body.nombre;
+    const apellido = req.body.apellido; 
     if (!user || !pass) {
         res.json(new StandarException('Datos incompletos', 400));
         return;
     }
-    const respuesta_usuario = await usuarioCtrl.createUsuario(user, pass);
+    const respuesta_usuario = await usuarioCtrl.createUsuario(user, pass, nombre, apellido);
     console.log(respuesta_usuario);
     if (respuesta_usuario instanceof StandarException) {
         console.log(respuesta_usuario);
