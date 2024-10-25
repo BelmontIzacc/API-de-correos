@@ -32,6 +32,13 @@ correoCtrl.enviarCorreo = async (usuario, token) => {
     if (!destinatario || !esCorreoValido(destinatario)) {
         return new StandarException('Correo no definido o formato incorrecto', codigos.validacionIncorrecta);
     }
+    let nombre_destiniatario;
+    if (!usuario.nombre) {
+        nombre_destiniatario = usuario.nombre;
+    } else {
+        nombre_destiniatario = usuario.correo;
+    }
+
 
     var options = {
         recipients: destinatario,
@@ -42,7 +49,7 @@ correoCtrl.enviarCorreo = async (usuario, token) => {
         template: "IdBird_child",
         variables: {
             aplicacion: "IdBird",
-            nombre: usuario.correo,
+            nombre: nombre_destiniatario,
             link: link,
         },
     };
