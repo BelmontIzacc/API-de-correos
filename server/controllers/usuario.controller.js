@@ -62,21 +62,21 @@ usuarioCtrl.mostrarPagina = async (token, res) => {
  * @param {*} enviarCorreo
  * @returns
 */
-usuarioCtrl.createUsuario = async (user, pass, nombre, apellido) => {   
-    const id_generada = generarIds();
+usuarioCtrl.createUsuario = async (id_usuario, user, pass, nombre, apellido) => {   
+    //const id_generada = generarIds();
     let usuario;
     if (id_generada == undefined && id_generada == null){
         return new StandarException('Error al guardar el usuario', codigos.errorAlCrearUsuario); 
     }
     if(!nombre && !apellido){
         usuario = new Usuario({
-            id_usuario: id_generada,
+            id_usuario: id_usuario,
             correo: user,
             contrasena: pass
         });
     }else{
         usuario = new Usuario({
-            id_usuario: id_generada,
+            id_usuario: id_usuario,
             nombre: nombre,
             apellido: apellido,
             correo: user,

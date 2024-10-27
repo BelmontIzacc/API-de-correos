@@ -41,7 +41,7 @@ correoCtrl.enviarCorreo = async (usuario, token) => {
             nombre_destinatario += " " + usuario.apellido;
         }
     }
-    console.log({nombre_destinatario});
+    //console.log({nombre_destinatario});
 
     var options = {
         recipients: destinatario,

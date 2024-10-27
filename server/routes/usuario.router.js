@@ -16,11 +16,12 @@ router.post('/registrar', async (req, res, next) => {
     const pass = req.body.contrasena;
     const nombre = req.body.nombre;
     const apellido = req.body.apellido; 
+    const id_usuario = req.body.id_usuario;
     if (!user || !pass) {
         res.json(new StandarException('Datos incompletos', 400));
         return;
     }
-    const respuesta_usuario = await usuarioCtrl.createUsuario(user, pass, nombre, apellido);
+    const respuesta_usuario = await usuarioCtrl.createUsuario(id_usuario, user, pass, nombre, apellido);
     console.log(respuesta_usuario);
     if (respuesta_usuario instanceof StandarException) {
         console.log(respuesta_usuario);
