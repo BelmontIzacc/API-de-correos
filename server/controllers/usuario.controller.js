@@ -99,6 +99,25 @@ usuarioCtrl.createUsuario = async (id_usuario, user, pass, nombre, apellido) => 
     };
 };
 
+/**
+ * @description Obtiene un usuario por correo y contraseña
+ * @param {*} correo
+ * @param {*} contrasena
+ * @returns
+ */
+usuarioCtrl.getUsuarioPorCorreoYContrasena = async (correo, contrasena) => {
+    try {
+        // Buscar usuario por correo y contraseña
+        const usuario = await Usuario.findOne({ correo: correo, contrasena: contrasena });
+        if (!usuario) {
+            return new StandarException('Usuario no encontrado o credenciales incorrectas', codigos.datoNoEncontrado);
+        }
+        return usuario;  // Si el usuario se encuentra, lo retornamos
+    } catch (error) {
+        return new StandarException('Error al buscar el usuario', codigos.errorGeneral, error);
+    }
+};
+
 
 let counter = 0;
 let lastGeneratedHour = "";
@@ -132,6 +151,15 @@ const generarIds = () => {
  * @description Obtiene todos los usuarios
  * @returns
 */
+usuarioCtrl.getUsuarios = async () => {
+    try {
+        const usuarios = await Usuario.find(); 
+        return usuarios;
+    } catch (error) {
+        return new StandarException('Usuarios no encontrados', codigos.datosNoEncontrados, error);
+    }
+};
+
 usuarioCtrl.getUsuarios = async () => {
     try {
         const usuarios = await Usuario.find(); 

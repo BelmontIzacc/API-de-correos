@@ -105,7 +105,23 @@ router.get('/enviarcorreo', verifyToken, async (req, res) => {
     res.json({respuesta_usuario, respuesta_correo});
 });
 
+router.post('/usuarios/correo', async (req, res) => {
+    const correo = req.body.correo;
+    const contrasena = req.body.contrasena;
 
+    if (!correo || !contrasena) {
+        return res.json(new StandarException('Correo y contraseña son requeridos', 400));
+    }
+
+    const respuesta = await usuarioCtrl.getUsuarioPorCorreoYContrasena(correo, contrasena);
+
+    if (respuesta instanceof StandarException) {
+        console.log(respuesta);
+        return res.json(respuesta);
+    }
+
+    return res.json(respuesta);  // Enviar la información del usuario encontrado
+});
 
 // Esta ruta será una vista por defecto para rutas no definidas
 router.get((req, res) => { res.render('404.ejs') });
