@@ -32,6 +32,7 @@ app.use(handleError);
 //Routes 
 //app.use(require('./routes/correo.router'));
 app.use(require('./routes/usuario.router'));
+app.use('/pag/', require('./routes/pagina.controller'));
 
 // Ruta con vista por defecto para rutas no definidas
 app.use((req, res) => { res.render(path.join(__dirname, '../views/pages/404.ejs')) });
