@@ -42,3 +42,4 @@ app.use((req, res) => { res.render(path.join(__dirname, '../views/pages/404.ejs'
 app.listen(app.get('port'), () => {
     console.log('Server en puerto', app.get('port'));
 });
+
